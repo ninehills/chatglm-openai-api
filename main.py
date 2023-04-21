@@ -94,8 +94,9 @@ def main():
         if args.tunnel == "cloudflare":
             print(">>> Start cloudflare tunnel..")
             from cloudflared import run
-            command = config['tunnel']['cloudflare']['cloudflared_path'] or "cloudflared"
-            run(command, args.port)
+            command = config['tunnel']['cloudflare']['cloudflared_path'] \
+                or "cloudflared"
+            run(command, config['tunnel']['cloudflare']['name'], args.port)
 
     from app import app
     uvicorn.run(app, host="0.0.0.0", port=args.port)

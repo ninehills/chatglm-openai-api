@@ -25,6 +25,7 @@ tokens = ["token1"]
   # Binding custom subdomains is a feature for paid accounts.
   subdomain = ""
   [tunnel.cloudflare]
-  # need init cloudflare tunnel, see README.md
+  # first need init cloudflare tunnel, see README.md
   cloudflared_path = "/usr/local/bin/cloudflared"
+  # tunnel name, see README.md
   name = "chatglm-openai-api"
