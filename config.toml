@@ -22,4 +22,5 @@ tokens = ["token1"]
   [tunnel.ngrok]
   token = ""
   region = "jp"
-  subdomain = "chatglm-openai-api"
+  # Binding custom subdomains is a feature for paid accounts.
+  subdomain = ""
