@@ -1,0 +1,15 @@
+protobuf==3.20.0
+transformers==4.27.1
+icetk
+cpm_kernels
+torch
+fastapi
+pydantic
+uvicorn
+sse_starlette
+pyngrok
+toml
+# for notebook
+nest-asyncio
+# only need by embeddings model
+text2vec

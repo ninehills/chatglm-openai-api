@@ -1,0 +1,25 @@
+[models]
+  [models.llm]
+    [models.llm."chatglm-6b"]
+    type = "huggingface"
+    path = "THUDM/chatglm-6b"
+    [models.llm."chatglm-6b-int8"]
+    type = "huggingface"
+    path = "THUDM/chatglm-6b-int8"
+    [models.llm."chatglm-6b-int4"]
+    type = "huggingface"
+    path = "THUDM/chatglm-6b-int4"
+
+  [models.embeddings]
+    [models.embeddings."text2vec-large-chinese"]
+    type = "huggingface"
+    path = "GanymedeNil/text2vec-large-chinese"
+
+[auth]
+tokens = ["token1"]
+
+[tunnel]
+  [tunnel.ngrok]
+  token = ""
+  region = "jp"
+  subdomain = "chatglm-openai-api"
