@@ -24,3 +24,6 @@ tokens = ["token1"]
   region = "jp"
   # Binding custom subdomains is a feature for paid accounts.
   subdomain = ""
+  [tunnel.cloudflare]
+  # need init cloudflare tunnel, see README.md
+  name = "chatglm-openai-api"

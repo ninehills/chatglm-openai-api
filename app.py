@@ -167,7 +167,7 @@ async def embeddings(body: EmbeddingsBody, request: Request):
         "data": [{
             "object": "embedding",
             "index": 0,
-            "embedding": embeddings,
+            "embedding": embeddings.tolist(),
         }],
         "model": "text-embedding-ada-002-v2",
         "usage": {

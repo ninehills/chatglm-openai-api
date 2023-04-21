@@ -91,6 +91,11 @@ def main():
             subdomain = config['tunnel']['ngrok']['subdomain'] or None
             http_tunnel = ngrok.connect(args.port, subdomain=subdomain)
             print(f">> Public URL: {http_tunnel.public_url}")
+        if args.tunnel == "cloudflare":
+            print(">>> Start cloudflare tunnel..")
+            from cloudflared import run
+            command = config['tunnel']['cloudflare']['cloudflared_path'] or "cloudflared"
+            run(command, args.port)
 
     from app import app
     uvicorn.run(app, host="0.0.0.0", port=args.port)
