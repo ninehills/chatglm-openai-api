@@ -26,4 +26,5 @@ tokens = ["token1"]
   subdomain = ""
   [tunnel.cloudflare]
   # need init cloudflare tunnel, see README.md
+  cloudflared_path = "/usr/local/bin/cloudflared"
   name = "chatglm-openai-api"
