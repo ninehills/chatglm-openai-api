@@ -28,13 +28,18 @@ class Message(BaseModel):
     content: str
 
 
-class Body(BaseModel):
+class ChatBody(BaseModel):
     messages: List[Message]
     model: str
     stream: Optional[bool] = False
     max_tokens: Optional[int] = 256
     temperature: Optional[float] = 0.95
     top_p: Optional[float] = 0.7
+
+
+class EmbeddingsBody(BaseModel):
+    input: str
+    model: str
 
 
 @app.get("/")
@@ -147,12 +152,36 @@ def generate_stream_response_stop():
             }
 
 
-@app.post("/v1/chat/completions")
-async def completions(body: Body, request: Request):
+@app.post("/v1/embeddings")
+async def embeddings(body: EmbeddingsBody, request: Request):
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
-    torch_gc()
+    if not context.embeddings_model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            "Embeddings model not found!")
+
+    embeddings = context.embeddings_model.encode(body.input)
+    content = {
+        "object": "list",
+        "data": [{
+            "object": "embedding",
+            "index": 0,
+            "embedding": embeddings,
+        }],
+        "model": "text-embedding-ada-002-v2",
+        "usage": {
+            "prompt_tokens": 0,
+            "total_tokens": 0
+        }
+    }
+    return JSONResponse(status_code=200, content=content)
+
+
+@app.post("/v1/chat/completions")
+async def completions(body: ChatBody, request: Request):
+    if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
     question = body.messages[-1]
     if question.role == 'user':
@@ -202,4 +231,3 @@ async def completions(body: Body, request: Request):
             max_length=max(2048, body.max_tokens))
         print(f"response: {response}")
         return JSONResponse(content=generate_response(response))
-
