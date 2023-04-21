@@ -31,7 +31,7 @@ CUDA_VISIBLE_DEVICES=0 python ./main.py  --llm_model chatglm-6b-int4 --embedding
 ## Running in background
 
 ```bash
-nohup CUDA_VISIBLE_DEVICES=0 python main.py --port 8080 --llm_model chatglm-6b-int4 --tunnel ngrok > nohup.out 2>&1 &
+CUDA_VISIBLE_DEVICES=0 nohup python main.py --port 8080 --llm_model chatglm-6b-int4 --tunnel ngrok > nohup.out 2>&1 &
 ```
 
 ## Running with cloudflare tunnel
