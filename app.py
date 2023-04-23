@@ -214,6 +214,10 @@ async def completions(body: ChatBody, request: Request):
                 if await request.is_disconnected():
                     return
                 ret = response[sends:]
+                # https://github.com/THUDM/ChatGLM-6B/issues/478
+                # 修复表情符号的输出问题
+                if "\uFFFD" == ret[-1:]:
+                    continue
                 sends = len(response)
                 if first:
                     first = False
