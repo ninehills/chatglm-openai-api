@@ -3,7 +3,7 @@
 import json
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -153,7 +153,8 @@ def generate_stream_response_stop():
 
 
 @app.post("/v1/embeddings")
-async def embeddings(body: EmbeddingsBody, request: Request):
+async def embeddings(body: EmbeddingsBody, request: Request, background_tasks: BackgroundTasks):
+    background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
@@ -179,7 +180,8 @@ async def embeddings(body: EmbeddingsBody, request: Request):
 
 
 @app.post("/v1/chat/completions")
-async def completions(body: ChatBody, request: Request):
+async def completions(body: ChatBody, request: Request, background_tasks: BackgroundTasks):
+    background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
