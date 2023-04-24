@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--port', type=int, help='Port number to run the service',
                         default=8080)
     parser.add_argument('--tunnel', type=str, help='Remote tunneling, default is ngrok',
-                        default="ngrok")
+                        default="")
 
     args = parser.parse_args()
 
