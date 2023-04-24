@@ -14,6 +14,26 @@ Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 - 模型托管在 huggingface 上，需要良好的国际互联网访问体验。
 - 默认运行在 GPU + CUDA 上。
 
+## 高级功能
+
+### 1. 从本地加载
+
+在 `config.toml` 中，配置模型的 path 为本地目录即可
+
+```toml
+    [models.llm."chatglm-6b-int4"]
+    type = "huggingface"
+    path = "{checkpoint_path}"
+```
+
+### 2. 多卡运行推理
+
+使用 `CUDA_VISIBLE_DEVICES` 环境变量，选择运行的 GPU 卡号，并设定运行的 GPU 数量（目前仅对 LLM Model 有效），例如：
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 python main.py --port 8080 --llm_model chatglm-6b-int4 --tunnel ngrok --gpus 2
+```
+
 ## 本地运行（ngrok 隧道，测试用）
 
 > 注： ngrok 隧道在未付费的时候无法使用自定义域名，只能使用动态域名，仅用来演示  

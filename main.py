@@ -22,11 +22,13 @@ def main():
                         help='Choosed embeddings model, can be empty',
                         default='')
     parser.add_argument('--device', type=str,
-                        help='Device to run the service, gpu/cpu',
+                        help='Device to run the service, gpu/cpu/mps',
                         default='gpu')
+    parser.add_argument('--gpus', type=int, help='Use how many gpus, default 1',
+                        default=1)
     parser.add_argument('--port', type=int, help='Port number to run the service',
                         default=8080)
-    parser.add_argument('--tunnel', type=str, help='Remote tunneling, default is ngrok',
+    parser.add_argument('--tunnel', type=str, help='Remote tunnel for public visit, default not set',
                         default="")
 
     args = parser.parse_args()
@@ -36,6 +38,7 @@ def main():
     print(f"Language Model: {args.llm_model}")
     print(f"Embeddings Model: {args.embeddings_model}")
     print(f"Device: {args.device}")
+    print(f"GPUs: {args.gpus}")
     print(f"Port: {args.port}")
     print(f"Tunneling: {args.tunnel}")
 
@@ -54,7 +57,7 @@ def main():
         print(f">> Use Huggingface llm model {llm['path']}")
         from llm import init_chatglm
         context.tokenizer, context.model = init_chatglm(
-            llm['path'], args.device)
+            llm['path'], args.device, args.gpus)
     else:
         print(f"Unsupported LLM model type {llm['type']}")
         sys.exit(1)
