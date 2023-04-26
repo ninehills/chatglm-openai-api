@@ -42,16 +42,13 @@ def do_chat_stream(model, tokenizer, question, history, model_args = None):
 
     output_stream = generate_stream_func(model, tokenizer, params, model.running_device)
 
-
     pre = 0
     for outputs in output_stream:
-        outputs = outputs.strip()
-        outputs = outputs.split(" ")
         now = len(outputs) - 1
         if now > pre:
-            yield(" ".join(outputs[pre:now]))
+            yield(outputs[pre:now])
             pre = now
-    yield(" ".join(outputs[pre:]))
+    yield(outputs[pre:])
 
 
 @torch.inference_mode()
