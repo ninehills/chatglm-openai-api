@@ -6,6 +6,7 @@ from typing import List
 
 @dataclass
 class Context:
+    llm_model_type: str
     model: any
     tokenizer: any
     embeddings_model: any
@@ -13,5 +14,5 @@ class Context:
     tokens: List[str]
 
 
-context = Context(None, None, None, [])
+context = Context(None, None, None, None, [])
 

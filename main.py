@@ -47,20 +47,27 @@ def main():
         print(f"Config: \n{config}")
         context.tokens = config['auth']['tokens']
 
-    print(f"> Start LLM model {args.llm_model}")
-    if args.llm_model not in config['models']['llm']:
-        print(f"LLM model {args.llm_model} not found in config file")
-        sys.exit(1)
+    if args.llm_model:
+        print(f"> Start LLM model {args.llm_model}")
+        if args.llm_model not in config['models']['llm']:
+            print(f"LLM model {args.llm_model} not found in config file")
+            sys.exit(1)
 
-    llm = config['models']['llm'][args.llm_model]
-    if llm['type'] == 'huggingface':
-        print(f">> Use Huggingface llm model {llm['path']}")
-        from llm import init_chatglm
-        context.tokenizer, context.model = init_chatglm(
-            llm['path'], args.device, args.gpus)
-    else:
-        print(f"Unsupported LLM model type {llm['type']}")
-        sys.exit(1)
+        llm = config['models']['llm'][args.llm_model]
+        context.llm_model_type = llm['type']
+        if llm['type'] == 'chatglm':
+            print(f">> Use chatglm llm model {llm['path']}")
+            from chatglm import init_chatglm
+            context.tokenizer, context.model = init_chatglm(
+                llm['path'], args.device, args.gpus)
+        elif llm['type'] == 'phoenix':
+            print(f">> Use phoenix llm model {llm['path']}")
+            from phoenix import init_phoenix
+            context.tokenizer, context.model = init_phoenix(
+                llm['path'], args.device, args.gpus)
+        else:
+            print(f"Unsupported LLM model type {llm['type']}")
+            sys.exit(1)
 
     if args.embeddings_model:
         print(f"> Start Embeddings model {args.embeddings_model}")
@@ -70,8 +77,8 @@ def main():
             sys.exit(1)
 
         embeddings = config['models']['embeddings'][args.embeddings_model]
-        if embeddings['type'] == 'huggingface':
-            print(f">> Use Huggingface embeddings model {embeddings['path']}")
+        if embeddings['type'] == 'default':
+            print(f">> Use default embeddings model {embeddings['path']}")
             from embeddings import load_embeddings_model
             context.embeddings_model = load_embeddings_model(
                 embeddings['path'])

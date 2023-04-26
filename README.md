@@ -22,7 +22,7 @@ Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 
 ```toml
     [models.llm."chatglm-6b-int4"]
-    type = "huggingface"
+    type = "chatglm"
     path = "{checkpoint_path}"
 ```
 
@@ -46,6 +46,9 @@ source .venv/bin/activate
 
 # 安装依赖
 pip install -r requirements.txt
+
+# 复制配置文件
+cp config.toml.example config.toml
 
 # 使用 CUDA_VISIBLE_DEVICES 选择运行的 GPU
 # llm_model 支持 chatglm-6b、chatglm-6b-int8、chatglm-6b-int4，占用显存从高到低。

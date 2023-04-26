@@ -1,18 +1,24 @@
 [models]
   [models.llm]
     [models.llm."chatglm-6b"]
-    type = "huggingface"
+    type = "chatglm"
     path = "THUDM/chatglm-6b"
     [models.llm."chatglm-6b-int8"]
-    type = "huggingface"
+    type = "chatglm"
     path = "THUDM/chatglm-6b-int8"
     [models.llm."chatglm-6b-int4"]
-    type = "huggingface"
+    type = "chatglm"
     path = "THUDM/chatglm-6b-int4"
+    [models.llm."phoenix-inst-chat-7b"]
+    type = "phoenix"
+    path = "FreedomIntelligence/phoenix-inst-chat-7b"
+    [models.llm."phoenix-inst-chat-7b-int4"]
+    type = "phoenix"
+    path = "FreedomIntelligence/phoenix-inst-chat-7b-int4"
 
   [models.embeddings]
     [models.embeddings."text2vec-large-chinese"]
-    type = "huggingface"
+    type = "default"
     path = "GanymedeNil/text2vec-large-chinese"
 
 [auth]

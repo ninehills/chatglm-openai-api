@@ -32,9 +32,9 @@ class ChatBody(BaseModel):
     messages: List[Message]
     model: str
     stream: Optional[bool] = False
-    max_tokens: Optional[int] = 256
-    temperature: Optional[float] = 0.95
-    top_p: Optional[float] = 0.7
+    max_tokens: Optional[int]
+    temperature: Optional[float]
+    top_p: Optional[float]
 
 
 class EmbeddingsBody(BaseModel):
@@ -49,8 +49,10 @@ def read_root():
 
 @app.get("/v1/models")
 def get_models():
-    ret = {"data": [
-        {
+    ret = {"data": [], "object": "list"}
+
+    if context.model:
+        ret['data'].append({
             "created": 1677610602,
             "id": "gpt-3.5-turbo",
             "object": "model",
@@ -73,11 +75,7 @@ def get_models():
             ],
             "root": "gpt-3.5-turbo",
             "parent": None,
-        },
-    ],
-        "object": "list"
-    }
-
+        })
     if context.embeddings_model:
         ret['data'].append({
             "created": 1671217299,
@@ -159,8 +157,7 @@ async def embeddings(body: EmbeddingsBody, request: Request, background_tasks: B
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
     if not context.embeddings_model:
-        raise HTTPException(status.HTTP_404_NOT_FOUND,
-                            "Embeddings model not found!")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Embeddings model not found!")
 
     embeddings = context.embeddings_model.encode(body.input)
     content = {
@@ -185,6 +182,8 @@ async def completions(body: ChatBody, request: Request, background_tasks: Backgr
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
 
+    if not context.model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "LLM model not found!")
     question = body.messages[-1]
     if question.role == 'user':
         question = question.content
@@ -205,35 +204,26 @@ async def completions(body: ChatBody, request: Request, background_tasks: Backgr
     print(f"question = {question}, history = {history}")
 
     if body.stream:
-        async def eval_chatglm():
-            sends = 0
+        async def eval_llm():
             first = True
-            for response, _ in context.model.stream_chat(
-                    context.tokenizer, question, history,
-                    temperature=body.temperature,
-                    top_p=body.top_p,
-                    max_length=max(2048, body.max_tokens)):
-                if await request.is_disconnected():
-                    return
-                ret = response[sends:]
-                # https://github.com/THUDM/ChatGLM-6B/issues/478
-                # 修复表情符号的输出问题
-                if "\uFFFD" == ret[-1:]:
-                    continue
-                sends = len(response)
+            for response in context.model.do_chat_stream(
+                context.model, context.tokenizer, question, history, {
+                    "temperature": body.temperature,
+                    "top_p": body.top_p,
+                    "max_tokens": body.max_tokens,
+                }):
                 if first:
                     first = False
                     yield json.dumps(generate_stream_response_start(),
-                                     ensure_ascii=False)
-                yield json.dumps(generate_stream_response(ret), ensure_ascii=False)
+                                    ensure_ascii=False)
+                yield json.dumps(generate_stream_response(response), ensure_ascii=False)
             yield json.dumps(generate_stream_response_stop(), ensure_ascii=False)
             yield "[DONE]"
-        return EventSourceResponse(eval_chatglm(), ping=10000)
+        return EventSourceResponse(eval_llm(), ping=10000)
     else:
-        response, _ = context.model.chat(
-            context.tokenizer, question, history,
-            temperature=body.temperature,
-            top_p=body.top_p,
-            max_length=max(2048, body.max_tokens))
-        print(f"response: {response}")
+        response = context.model.do_chat(context.model, context.tokenizer, question, history, {
+            "temperature": body.temperature,
+            "top_p": body.top_p,
+            "max_tokens": body.max_tokens,
+        })
         return JSONResponse(content=generate_response(response))
