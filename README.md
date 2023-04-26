@@ -2,12 +2,10 @@
 
 Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 
-## Todo
+## 更新历史
 
-- [x] Add Embeddings Model
-- [ ] support ChatGLM-6B Fine-tuning model
-- [x] support Cloudflare Tunnel with custom domain
-- [ ] add Dockerfile
+- 2023-04-26： 支持 `FreedomIntelligence/phoenix-inst-chat-7b` 模型
+  - 使用 `--llm_model phoenix-inst-chat-7b/phoenix-inst-chat-7b-int4` 加载
 
 ## 注意事项
 
