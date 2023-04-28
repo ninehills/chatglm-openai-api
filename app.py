@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import json
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from fastapi import FastAPI, HTTPException, Request, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,7 +38,8 @@ class ChatBody(BaseModel):
 
 
 class EmbeddingsBody(BaseModel):
-    input: str
+    # Python 3.8 does not support str | List[str]
+    input: Any
     model: str
 
 

@@ -81,7 +81,7 @@ def main():
             print(f">> Use default embeddings model {embeddings['path']}")
             from embeddings import load_embeddings_model
             context.embeddings_model = load_embeddings_model(
-                embeddings['path'])
+                embeddings['path'], args.device)
         else:
             print(f"Unsupported Embeddings model type {embeddings['type']}")
             sys.exit(1)
