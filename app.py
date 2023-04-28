@@ -38,8 +38,9 @@ class ChatBody(BaseModel):
 
 
 class EmbeddingsBody(BaseModel):
-    input: str
+    input: str | List[str]
     model: str
+    encoding_format: str | None
 
 
 @app.get("/")
@@ -177,7 +178,7 @@ async def embeddings(body: EmbeddingsBody, request: Request, background_tasks: B
 
 
 @app.post("/v1/chat/completions")
-async def completions(body: ChatBody, request: Request, background_tasks: BackgroundTasks):
+async def completions(body: EmbeddingsBody, request: Request, background_tasks: BackgroundTasks):
     background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
