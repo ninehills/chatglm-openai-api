@@ -37,6 +37,15 @@ class ChatBody(BaseModel):
     top_p: Optional[float]
 
 
+class CompletionBody(BaseModel):
+    prompt: str
+    model: str
+    stream: Optional[bool] = False
+    max_tokens: Optional[int]
+    temperature: Optional[float]
+    top_p: Optional[float]
+
+
 class EmbeddingsBody(BaseModel):
     # Python 3.8 does not support str | List[str]
     input: Any
@@ -233,6 +242,44 @@ async def completions(body: ChatBody, request: Request, background_tasks: Backgr
         return EventSourceResponse(eval_llm(), ping=10000)
     else:
         response = context.model.do_chat(context.model, context.tokenizer, question, history, {
+            "temperature": body.temperature,
+            "top_p": body.top_p,
+            "max_tokens": body.max_tokens,
+        })
+        return JSONResponse(content=generate_response(response))
+
+
+@app.post("/v1/completions")
+async def single_completions(body: CompletionBody, request: Request, background_tasks: BackgroundTasks):
+    background_tasks.add_task(torch_gc)
+    if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
+
+    if not context.model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "LLM model not found!")
+    question = body.prompt
+
+    print(f"question = {question}")
+
+    if body.stream:
+        async def eval_llm():
+            first = True
+            for response in context.model.do_chat_stream(
+                    context.model, context.tokenizer, question, [], {
+                        "temperature": body.temperature,
+                        "top_p": body.top_p,
+                        "max_tokens": body.max_tokens,
+                    }):
+                if first:
+                    first = False
+                    yield json.dumps(generate_stream_response_start(),
+                                     ensure_ascii=False)
+                yield json.dumps(generate_stream_response(response), ensure_ascii=False)
+            yield json.dumps(generate_stream_response_stop(), ensure_ascii=False)
+            yield "[DONE]"
+        return EventSourceResponse(eval_llm(), ping=10000)
+    else:
+        response = context.model.do_chat(context.model, context.tokenizer, question, [], {
             "temperature": body.temperature,
             "top_p": body.top_p,
             "max_tokens": body.max_tokens,

@@ -6,6 +6,8 @@ def init_model_args(model_args = None):
     if model_args is None:
         model_args = {}
     model_args['temperature'] = model_args['temperature'] if model_args.get('temperature') != None else 0.95
+    if model_args['temperature'] <= 0:
+        model_args['temperature'] = 0.1
     model_args['top_p'] = model_args['top_p'] if model_args.get('top_p') else 0.7
     model_args['max_tokens'] = model_args['max_tokens'] if model_args.get('max_tokens') != None else 512
 
