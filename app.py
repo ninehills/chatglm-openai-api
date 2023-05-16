@@ -49,7 +49,7 @@ class CompletionBody(BaseModel):
 class EmbeddingsBody(BaseModel):
     # Python 3.8 does not support str | List[str]
     input: Any
-    model: str
+    model: Optional[str]
 
 
 @app.get("/")
@@ -115,22 +115,43 @@ def get_models():
     return ret
 
 
-def generate_response(content: str):
-    return {
-        "id": "chatcmpl-77PZm95TtxE0oYLRx3cxa6HtIDI7s",
-        "object": "chat.completion",
-        "created": 1682000966,
-        "model": "gpt-3.5-turbo-0301",
-        "usage": {
-            "prompt_tokens": 10,
-            "completion_tokens": 10,
-            "total_tokens": 20,
-        },
-        "choices": [{
-            "message": {"role": "assistant", "content": content},
-            "finish_reason": "stop", "index": 0}
-        ]
-    }
+def generate_response(content: str, chat: bool = True):
+    if chat:
+        return {
+            "id": "chatcmpl-77PZm95TtxE0oYLRx3cxa6HtIDI7s",
+            "object": "chat.completion",
+            "created": 1682000966,
+            "model": "gpt-3.5-turbo-0301",
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0,
+            },
+            "choices": [{
+                "message": {"role": "assistant", "content": content},
+                "finish_reason": "stop", "index": 0}
+            ]
+        }
+    else:
+        return {
+            "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
+            "object": "text_completion",
+            "created": 1589478378,
+            "model": "text-davinci-003",
+            "choices": [
+                {
+                "text": content,
+                "index": 0,
+                "logprobs": None,
+                "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0
+            }
+        }
 
 
 def generate_stream_response_start():
@@ -142,26 +163,56 @@ def generate_stream_response_start():
     }
 
 
-def generate_stream_response(content: str):
-    return {
-        "id": "chatcmpl-77QWpn5cxFi9sVMw56DZReDiGKmcB",
-        "object": "chat.completion.chunk",
-        "created": 1682004627,
-        "model": "gpt-3.5-turbo-0301",
-        "choices": [{"delta": {"content": content}, "index": 0, "finish_reason": None}
-                    ]}
+
+def generate_stream_response(content: str, chat: bool = True):
+    if chat:
+        return {
+            "id": "chatcmpl-77QWpn5cxFi9sVMw56DZReDiGKmcB",
+            "object": "chat.completion.chunk",
+            "created": 1682004627,
+            "model": "gpt-3.5-turbo-0301",
+            "choices": [{"delta": {"content": content}, "index": 0, "finish_reason": None}
+                        ]}
+    else:
+        return {
+            "id":"cmpl-7GfnvmcsDmmTVbPHmTBcNqlMtaEVj",
+            "object":"text_completion",
+            "created":1684208299,
+            "choices":[
+                {
+                    "text": content,
+                    "index": 0,
+                    "logprobs": None,
+                    "finish_reason": None,
+                }
+            ],
+            "model": "text-davinci-003"
+        }
 
 
-def generate_stream_response_stop():
-    return {"id": "chatcmpl-77QWpn5cxFi9sVMw56DZReDiGKmcB",
+def generate_stream_response_stop(chat: bool = True):
+    if chat:
+        return {"id": "chatcmpl-77QWpn5cxFi9sVMw56DZReDiGKmcB",
             "object": "chat.completion.chunk", "created": 1682004627,
             "model": "gpt-3.5-turbo-0301",
             "choices": [{"delta": {}, "index": 0, "finish_reason": "stop"}]
             }
-
+    else:
+        return {
+            "id":"cmpl-7GfnvmcsDmmTVbPHmTBcNqlMtaEVj",
+            "object":"text_completion",
+            "created":1684208299,
+            "choices":[
+                {"text":"","index":0,"logprobs":None,"finish_reason":"stop"}],
+            "model":"text-davinci-003",
+        }
 
 @app.post("/v1/embeddings")
 async def embeddings(body: EmbeddingsBody, request: Request, background_tasks: BackgroundTasks):
+    return do_embeddings(body, request, background_tasks)
+
+
+def do_embeddings(body: EmbeddingsBody, request: Request, background_tasks: BackgroundTasks):
     background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
@@ -196,8 +247,13 @@ async def embeddings(body: EmbeddingsBody, request: Request, background_tasks: B
     return JSONResponse(status_code=200, content=content)
 
 
+@app.post("/v1/engines/{engine}/embeddings")
+async def engines_embeddings(engine: str, body: EmbeddingsBody, request: Request, background_tasks: BackgroundTasks):
+    return do_embeddings(body, request, background_tasks)
+
+
 @app.post("/v1/chat/completions")
-async def completions(body: ChatBody, request: Request, background_tasks: BackgroundTasks):
+async def chat_completions(body: ChatBody, request: Request, background_tasks: BackgroundTasks):
     background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
@@ -250,7 +306,7 @@ async def completions(body: ChatBody, request: Request, background_tasks: Backgr
 
 
 @app.post("/v1/completions")
-async def single_completions(body: CompletionBody, request: Request, background_tasks: BackgroundTasks):
+async def completions(body: CompletionBody, request: Request, background_tasks: BackgroundTasks):
     background_tasks.add_task(torch_gc)
     if request.headers.get("Authorization").split(" ")[1] not in context.tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token is wrong!")
@@ -263,19 +319,14 @@ async def single_completions(body: CompletionBody, request: Request, background_
 
     if body.stream:
         async def eval_llm():
-            first = True
             for response in context.model.do_chat_stream(
                     context.model, context.tokenizer, question, [], {
                         "temperature": body.temperature,
                         "top_p": body.top_p,
                         "max_tokens": body.max_tokens,
                     }):
-                if first:
-                    first = False
-                    yield json.dumps(generate_stream_response_start(),
-                                     ensure_ascii=False)
-                yield json.dumps(generate_stream_response(response), ensure_ascii=False)
-            yield json.dumps(generate_stream_response_stop(), ensure_ascii=False)
+                yield json.dumps(generate_stream_response(response, chat=False), ensure_ascii=False)
+            yield json.dumps(generate_stream_response_stop(chat=False), ensure_ascii=False)
             yield "[DONE]"
         return EventSourceResponse(eval_llm(), ping=10000)
     else:
@@ -284,4 +335,4 @@ async def single_completions(body: CompletionBody, request: Request, background_
             "top_p": body.top_p,
             "max_tokens": body.max_tokens,
         })
-        return JSONResponse(content=generate_response(response))
+        return JSONResponse(content=generate_response(response, chat=False))
