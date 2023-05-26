@@ -15,6 +15,7 @@ Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 ## 在 Colab 中运行
 
 ```python
+# 必须首先选择运行时为GPU运行时
 !git clone https://github.com/ninehills/chatglm-openai-api.git
 !cd chatglm-openai-api && cp config.toml.example config.toml
 !cd chatglm-openai-api && python3 main.py --llm_model="chatglm-6b-int4" --tunnel=ngrok --port 8100
