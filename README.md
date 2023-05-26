@@ -12,6 +12,14 @@ Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 - 模型托管在 huggingface 上，需要良好的国际互联网访问体验。
 - 默认运行在 GPU + CUDA 上。
 
+## 在 Colab 中运行
+
+```python
+!git clone https://github.com/ninehills/chatglm-openai-api.git
+!cd chatglm-openai-api && cp config.toml.example config.toml
+!cd chatglm-openai-api && python3 main.py --llm_model="chatglm-6b-int4" --tunnel=ngrok --port 8100
+```
+
 ## 高级功能
 
 ### 1. 从本地加载
