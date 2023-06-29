@@ -268,14 +268,21 @@ async def chat_completions(body: ChatBody, request: Request, background_tasks: B
 
     history = []
     user_question = ''
-    for message in body.messages:
+    last_role = ''
+    for message in body.messages[:-1]:
         if message.role == 'system':
             history.append((message.content, "OK"))
-        if message.role == 'user':
-            user_question = message.content
+        elif message.role == 'user':
+            if last_role == 'user' and user_question != '':
+                history.append((user_question, "ok"))     
+            user_question = message.content        
         elif message.role == 'assistant':
-            assistant_answer = message.content
-            history.append((user_question, assistant_answer))
+            if last_role == 'user' and user_question != '':
+                history.append((user_question, message.content))
+                user_question = ''   
+        last_role = message.role
+    if user_question != '':
+        history.append((user_question, "ok"))          
 
     print(f"question = {question}, history = {history}")
 
