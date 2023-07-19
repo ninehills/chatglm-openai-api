@@ -10,6 +10,16 @@
     type = "chatglm"
     path = "THUDM/chatglm-6b-int4"
     [models.llm."phoenix-inst-chat-7b"]
+    [models.llm."chatglm2-6b"]
+    type = "chatglm"
+    path = "THUDM/chatglm2-6b"
+    [models.llm."chatglm2-6b-int8"]
+    type = "chatglm"
+    path = "THUDM/chatglm2-6b-int8"
+    [models.llm."chatglm2-6b-int4"]
+    type = "chatglm"
+    path = "THUDM/chatglm2-6b-int4"
+    [models.llm."phoenix-inst-chat-7b"]
     type = "phoenix"
     path = "FreedomIntelligence/phoenix-inst-chat-7b"
     [models.llm."phoenix-inst-chat-7b-int4"]

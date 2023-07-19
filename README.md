@@ -1,6 +1,6 @@
 # chatglm-openai-api
 
-Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
+Provide OpenAI style API for  ChatGLM-6B/ChatGLM2-6B and Chinese Embeddings Model
 
 ## 更新历史
 
@@ -18,7 +18,8 @@ Provide OpenAI style API for  ChatGLM-6B and Chinese Embeddings Model
 # 必须首先选择运行时为GPU运行时
 !git clone https://github.com/ninehills/chatglm-openai-api.git
 !cd chatglm-openai-api && cp config.toml.example config.toml
-!cd chatglm-openai-api && python3 main.py --llm_model="chatglm-6b-int4" --tunnel=ngrok --port 8100
+!cd chatglm-openai-api && pip install -r requirements.txt
+!cd chatglm-openai-api && python3 main.py --llm_model="chatglm2-6b-int4" --tunnel=ngrok --port 8100
 ```
 
 ## 高级功能
