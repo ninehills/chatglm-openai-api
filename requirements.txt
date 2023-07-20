@@ -4,7 +4,7 @@ icetk
 cpm_kernels
 torch
 fastapi
-pydantic
+pydantic==1.10.11
 uvicorn
 sse_starlette
 pyngrok
